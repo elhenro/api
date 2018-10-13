@@ -1,7 +1,8 @@
 package main
 
 import (
-	//"bytes"
+	"bytes"
+	"unicode"
 	"fmt"
 	"strings"
 	"time"
@@ -49,40 +50,37 @@ func Write(w http.ResponseWriter, r *http.Request) {
 }
 
 func getTime(w http.ResponseWriter, r *http.Request) {
-	/* until now..
-	v := "2018-10-13 17:30 CEST"
-    then, err := time.Parse(timeFormat, v)
-    if err != nil {
-		//fmt.Println(err)
-		panic(err)
-        return
-    }
-    duration := time.Since(then)
-	*/
 	t1 := getLastLineOfFile(timeStartFile)
-	//t2 := getLastLineOfFile(timeEndFile)
-	//log.Printf(t1)
-	//log.Printf(t2)
-	//duration := getTimeframe(t1, t2)
+	t2 := getLastLineOfFile(timeEndFile)
 
-	duration := t1	
-	json.NewEncoder(w).Encode(duration)
+	times := []string{t1, ",", t2}
+	var str bytes.Buffer
+	for _, l := range times {
+		str.WriteString(l)
+	}
+
+	json.NewEncoder(w).Encode(str.String())
 }
 
 func setTime(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	var timeRequest string
 	_ = json.NewDecoder(r.Body).Decode(&timeRequest)
-//	timeRequest = fmt.Sprintf(params["t1"], params["t2"])	
 	t1 := params["t1"]	
 	t2 := params["t2"]
 
-	writeToFile(timeStartFile, t1)
-	writeToFile(timeEndFile, t2)
+	var response string
+	if (IsLetter(t1) || IsLetter(t2)) {
+		response = "error, not in time hour format"
+		err := response
+		panic(err)
+	} else {	
+		writeToFile(timeStartFile, t1)
+		writeToFile(timeEndFile, t2)
 
-	duration := getTimeframe(t1, t2)
-
-    json.NewEncoder(w).Encode(duration)
+		res := getTimeframeHours(t1, t2)
+    	json.NewEncoder(w).Encode(res)
+	}
 }
 
 func writeToFile(file string, content string){
@@ -100,7 +98,7 @@ func writeToFile(file string, content string){
 	}
 }
 
-func getTimeframe(t1 string, t2 string) float64{
+func getTimeframeHours(t1 string, t2 string) float64{
 	// 10:30, 17:30
 	// returns timeframe in hours  e.g.: 2.8
 
@@ -125,6 +123,30 @@ func getTimeframe(t1 string, t2 string) float64{
 	return d.Hours()
 }
 
+func getTimePercentage(w http.ResponseWriter, r *http.Request){
+	t1 := getLastLineOfFile(timeStartFile)
+	t2 := getLastLineOfFile(timeEndFile)
+	now := time.Now()
+	
+	//t := "22:30"
+	t := now.Format( "15:04" )
+
+	//timeNow := time.Date
+	timeOver := getTimeframeHours(t1, t) 
+	timeFrame := getTimeframeHours(t1, t2)
+
+	p := FloatToString(timeOver / timeFrame)
+	//p := timeOver
+	//p := timeFrame
+	
+	fmt.Printf("start: %s\n", t1)
+	fmt.Printf("end: %s\n",t2)
+	fmt.Printf("now: %s\n",t)
+	fmt.Printf("percentage: %s\n",p)
+
+	json.NewEncoder(w).Encode(p)
+}
+
 func getLastLineOfFile(fname string) string {
 	file, err := os.Open(fname)
     if err != nil {
@@ -143,27 +165,26 @@ func getLastLineOfFile(fname string) string {
 	l := strings.Split(lines, "\n")
 	ll := l[len(l)-2]
 	return ll
-/*
-    fi, err := file.Stat()
-    if err != nil {
-        fmt.Println(err)
-    }
+}
 
-    buf := make([]byte, 32)
-    n, err := file.ReadAt(buf, fi.Size()-int64(len(buf)))
-    if err != nil {
-        fmt.Println(err)
+func IsLetter(s string) bool {
+    for _, r := range s {
+        if !unicode.IsLetter(r) {
+            return false
+        }
     }
-    buf = buf[:n]
-	fmt.Printf("%s", buf)
-	return string(buf)
-	*/
+    return true
+}
+
+func FloatToString(input_num float64) string {
+    return strconv.FormatFloat(input_num, 'f', 6, 64)
 }
 
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/time", getTime).Methods("GET")
 	router.HandleFunc("/time/set/{t1}/{t2}", setTime).Methods("POST")
+	router.HandleFunc("/time/percent", getTimePercentage).Methods("GET")
 
 	router.HandleFunc("/read", Read).Methods("GET")
 	router.HandleFunc("/write/{p}", Write).Methods("POST")
