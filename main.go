@@ -5,10 +5,12 @@ import (
 	"bytes"
     "encoding/json"
 	"log"
+	//"github.com/gorilla/handlers"
     "github.com/gorilla/mux"
 	"net/http"
 	"io/ioutil"
 	L "./lib"
+	"github.com/rs/cors"
 )
 
 const (
@@ -86,11 +88,17 @@ func setTime(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	router := mux.NewRouter()
+
+	handler := cors.Default().Handler(router)
+	//headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
+	//methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	//corsOk:=handlers.AllowedOrigins([]string{"*"})
+
 	router.HandleFunc("/time", getTime).Methods("GET")
 	router.HandleFunc("/time/set/{t1}/{t2}", setTime).Methods("POST")
 	router.HandleFunc("/time/percent", getTimePercentage).Methods("GET")
 
 	router.HandleFunc("/read", Read).Methods("GET")
 	router.HandleFunc("/write/{p}", Write).Methods("POST")
-    log.Fatal(http.ListenAndServe(":8000", router))
+    log.Fatal(http.ListenAndServe(":8000", handler/*handlers.CORS(corsOk, headersOk, methodsOk)(router)*/))
 }
