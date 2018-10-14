@@ -72,6 +72,15 @@ func FloatToString(input_num float64) string {
     return strconv.FormatFloat(input_num, 'f', 6, 64)
 }
 
+
+func Join(strs ...string) string {
+	b := strings.Builder{}
+	for _, str := range strs {
+		b.WriteString(str)
+	}
+	r := b.String()
+	return r
+}
 func WriteToFile(file string, content string){
 	f, err := os.OpenFile(file, os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {

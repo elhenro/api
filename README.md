@@ -3,7 +3,7 @@
 testing on cli
 
 ## start
-`go run main.go` to start api server
+`go run *.go` to start api server
 
 `cd client && npm i && npm run dev` to install and start vue dev server
 
