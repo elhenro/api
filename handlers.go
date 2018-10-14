@@ -98,3 +98,13 @@ func setTime(w http.ResponseWriter, r *http.Request) {
     	json.NewEncoder(w).Encode(res)
 	}
 }
+
+func getHelp(w http.ResponseWriter, r *http.Request) {
+	content, err := ioutil.ReadFile( helpFile )
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result := string(content)
+	json.NewEncoder(w).Encode(result)
+}

@@ -1,0 +1,11 @@
+possible commands:
+
+    /time/set/10:30/18:45
+    /time/percent
+
+    /read
+    /write/something
+
+    /text
+    /text/something
+

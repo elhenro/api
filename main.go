@@ -14,6 +14,7 @@ const (
 	timeStartFile = "testdata/timeStart"
 	timeEndFile = "testdata/timeEnd"
 	helloFile = "testdata/hello"
+	helpFile = "testdata/help"
 	port = 8000
 )
 
@@ -22,6 +23,7 @@ func main() {
 
 	handler := cors.Default().Handler(router)
 
+	router.HandleFunc("/", getHelp).Methods("GET")
 	router.HandleFunc("/time", getTime).Methods("GET")
 	router.HandleFunc("/time/set/{t1}/{t2}", setTime).Methods("POST")
 	router.HandleFunc("/time/percent", getTimePercentage).Methods("GET")
