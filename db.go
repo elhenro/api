@@ -19,7 +19,6 @@ const (
 )
 
 func mysqlGet(database string, row string, item string, limit int) []Text {
-	
 	q := make([]Text, 0, 2)
 
 	c := L.Join(mysqlUser, ":", mysqlPass, "@/", database)
@@ -27,7 +26,7 @@ func mysqlGet(database string, row string, item string, limit int) []Text {
 	if err != nil {
         panic(err.Error())
 	}
-	//defer db.Close()	
+	defer db.Close()	
 	results, err := db.Query(L.Join("SELECT ", item, " FROM ", row ," limit ", strconv.Itoa(limit)))
 	if err != nil {
 		panic(err.Error())
@@ -40,6 +39,27 @@ func mysqlGet(database string, row string, item string, limit int) []Text {
 		}
 		q = append(q, Text{r.ID, r.Subject, r.Creation})
 	}
-	db.Close();
+	//db.Close();
 	return q
+}
+
+func mysqlWriteText(database string, row string, id int, content string) {
+	c := L.Join(mysqlUser, ":", mysqlPass, "@/", database)
+	db, err := sql.Open("mysql", c)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	stmtIns, err := db.Prepare(L.Join("INSERT INTO ", row, " ( id, subject, creation ) VALUES( ?, ?, NOW() )"))
+	if err != nil {
+		panic(err.Error())
+	}
+	defer stmtIns.Close() 
+
+	_, err = stmtIns.Exec( id, content)
+	if err != nil {
+		panic(err.Error())
+	}
+
 }

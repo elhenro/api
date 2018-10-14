@@ -30,6 +30,6 @@ func main() {
 	router.HandleFunc("/write/{p}", Write).Methods("POST")
 
 	router.HandleFunc("/text", getTextFromDB).Methods("GET")
-	//router.HandleFunc("/text/{p}", writeTextToDB).Methods("POST")
+	router.HandleFunc("/text/{p}", writeTextToDB).Methods("POST")
     log.Fatal(http.ListenAndServe(L.Join(":",strconv.Itoa(port)), handler/*handlers.CORS(corsOk, headersOk, methodsOk)(router)*/))
 }

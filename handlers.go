@@ -20,6 +20,19 @@ func getTextFromDB(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
+func writeTextToDB(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+    var content string
+	_ = json.NewDecoder(r.Body).Decode(&content)
+	content = params["p"]	
+
+	log.Println("hai")
+	mysqlWriteText("api", "texts", 2, string(content))
+
+	result := mysqlGet("api", "texts", "*", 10)
+	json.NewEncoder(w).Encode(result)
+}
+
 func Read(w http.ResponseWriter, r *http.Request) {
 	content, err := ioutil.ReadFile( helloFile )
 	if err != nil {
