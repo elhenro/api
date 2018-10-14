@@ -19,3 +19,9 @@ testing on cli
 `curl -i http://localhost:8000/read`
 
 `curl -d -X POST http://localhost:8000/write/test`
+
+## mysql
+
+`curl -i http://localhost:8000/text` get all mysql text slices
+
+`curl -d -X POST http://localhost:8000/text/schlubbel` add schlubbel as new text item to mysql
