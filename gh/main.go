@@ -10,30 +10,11 @@ import (
 )
 
 func main() {
-	tasks := []string{"cook", "clean", "laundry", "eat", "sleep", "code"}
-	apiUrls := []string{"/time", "time/set/{10:30/18:00}", }
+    apiUrls := []string{"/time", "/time/set/hh:mm/hh:mm", "/text", "/text/x" }
 
   	app := cli.NewApp()
   	app.EnableBashCompletion = true
   	app.Commands = []cli.Command{
-    {
-      Name:  "complete",
-      Aliases: []string{"c"},
-      Usage: "complete a task on the list",
-      Action: func(c *cli.Context) error {
-		 fmt.Println("completed task: ", c.Args().First())
-         return nil
-      },
-      BashComplete: func(c *cli.Context) {
-        // This will complete if no args are passed
-        if c.NArg() > 0 {
-          return
-        }
-        for _, t := range tasks {
-          fmt.Println(t)
-        }
-      },
-	},
 	{
       Name:  "post",
       Aliases: []string{"c"},

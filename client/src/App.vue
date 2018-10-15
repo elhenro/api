@@ -1,34 +1,37 @@
 <template>
   <div id="app">
+
+    <input v-model="time" placeholder=".. time ...">
+    <button v-on:click="sendTime()">go</button>
     <p>{{results}}</p>
-     <vue-circle
-        ref="twheel1"
-        :progress=results
-        :size="200"
-        :reverse="false"
-        line-cap="round"
-        :fill="fill"
-        empty-fill="rgba(0, 30, 0, .1)"
-        :animation-start-value="0.0"
-        :start-angle="0"
-        insert-mode="append"
-        :thickness="5"
-        :show-percent="true"
-        @vue-circle-progress="progress"
-        @vue-circle-end="progress_end">
-          <p>Slot!</p>
+
+    <br>
+    <vue-circle
+      ref="twheel1"
+      :progress=results
+      :size="200"
+      :reverse="false"
+      line-cap="round"
+      :fill="fill"
+      empty-fill="rgba(0, 30, 0, .1)"
+      :animation-start-value="0.0"
+      :start-angle="0"
+      insert-mode="append"
+      :thickness="5"
+      :show-percent="true"
+      @vue-circle-progress="progress"
+      @vue-circle-end="progress_end">
+        <p>Slot!</p>
       </vue-circle>
-      <input v-model="time" placeholder=".. time ...">
-      <button v-on:click="sendTime()">go</button>
-
-  <input v-model="message" placeholder="..msg ...">
-      <button v-on:click="sendMessage()">go</button>
-
-      {{message}}
-      <p v-for="msg in messages">
-        {{msg.text}}
+      
+      <div class="chatWindow">
+        <p v-for="msg in messages">
+          {{msg.id}} {{msg.name}} {{msg.Creation}}
         </p>
-        {{messages}}
+      </div>
+
+      <input v-model="message" placeholder="..msg ..." v-on:keyup.enter="sendMessage()">
+      <button v-on:click="sendMessage()">go</button>
   </div>
 </template>
 
@@ -37,7 +40,6 @@
   import TypeDetect from 'type-detect'
   import axios from 'axios'
   import VueAxios from 'vue-axios'
-  //import VueCircle from 'vue2-circle-progress'
   import VueCircle from 'vue2-circle-progress-redraw'
 
   
@@ -57,10 +59,10 @@ export default {
       results: 3/* || Number(this.results),//Number(this.getProgress),*/,
       time: "",
       message: "",
-      messages: [/*
+      messages: Array,/*[]
         { text: "tt"},
         { text: "tddt"}
-        */],
+      ],*/
       fill: { gradient: ["black", "red"]},
     }
   },
@@ -97,27 +99,38 @@ export default {
     },
     sendMessage(){
       this.addMessage(this.getMessage)
+      //this.requestMessages()
+      this.sleep(200)
+      this.loadMessages()
+      this.sleep(200)
+      this.loadMessages()
+      this.message = ""
+    },
+    sleep(ms){
+       return new Promise(resolve => setTimeout(resolve, ms))
     },
     getMessage(){
+      // gets message user input
       return this.message;
     },
-    requestMessages(){
+    returnTest(){
+      return "test"
+    },
+    loadMessages() {
+      var r = Array
       axios.get(urlReadTextApi).then(response => {
-        this.messages.push(response.data)
+        this.setLocalMessages(response.data)
       })
+    },
+    setLocalMessages(array){
+      this.messages = array.reverse()
     },
     addMessage(string){
       axios.post(urlWriteTextApi + this.getMessage(), 
       this.name,
       { headers: {
-        'Content-type': 'application/x-www-form-urlencoded',
-      }
-      })/*.then(response => ); */
-      this.requestMessages()
-    },
-    refreshMessages(){
-      axios.get(url).then(response => {
-        this.messages.push(response.data)
+          'Content-type': 'application/x-www-form-urlencoded',
+        }
       })
     },
     refreshTime(){
@@ -142,7 +155,8 @@ export default {
   },
   mounted() {
     this.refreshTime()
-    this.requestMessages()
+    this.loadMessages()
+    //this.messages = this.getMessages()
   },
   render: h => h(App)
 }
@@ -174,5 +188,9 @@ li {
 
 a {
   color: #42b983;
+}
+.chatWindow {
+  height: 40vh;
+  overflow: auto;
 }
 </style>

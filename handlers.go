@@ -13,11 +13,16 @@ import (
 
 func getTextFromDB(w http.ResponseWriter, r *http.Request) {
 
-	resultFromDb := mysqlGet("api", "texts", "*", 10)
+	resultFromDb := mysqlGet("api", "texts", "*"/*, 10*/)
 	content:= resultFromDb
 
 	result := content
 	json.NewEncoder(w).Encode(result)
+}
+
+func getNewIDfromTextDB(w http.ResponseWriter, r *http.Request) {
+	res := mysqlGetNewHighestID("api", "texts")
+	json.NewEncoder(w).Encode(res)
 }
 
 func writeTextToDB(w http.ResponseWriter, r *http.Request) {
@@ -26,11 +31,9 @@ func writeTextToDB(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewDecoder(r.Body).Decode(&content)
 	content = params["p"]	
 
-	log.Println("hai")
-	// TODO: get id automatically
-	mysqlWriteText("api", "texts", 3, string(content))
+	mysqlWriteText("api", "texts", mysqlGetNewHighestID("api", "texts"), string(content))
 
-	result := mysqlGet("api", "texts", "*", 10)
+	result := mysqlGet("api", "texts", "*"/*, 10*/)
 	json.NewEncoder(w).Encode(result)
 }
 

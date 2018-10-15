@@ -1,7 +1,7 @@
 package main
 
 import (
-	"strconv"
+	//"strconv"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	L "./lib"
@@ -18,7 +18,7 @@ const (
 	mysqlPass = "test"
 )
 
-func mysqlGet(database string, row string, item string, limit int) []Text {
+func mysqlGet(database string, row string, item string/*, limit int*/) []Text {
 	q := make([]Text, 0, 2)
 
 	c := L.Join(mysqlUser, ":", mysqlPass, "@/", database)
@@ -27,7 +27,7 @@ func mysqlGet(database string, row string, item string, limit int) []Text {
         panic(err.Error())
 	}
 	defer db.Close()	
-	results, err := db.Query(L.Join("SELECT ", item, " FROM ", row ," limit ", strconv.Itoa(limit)))
+	results, err := db.Query(L.Join("SELECT ", item, " FROM ", row /*," limit ", strconv.Itoa(limit)*/))
 	if err != nil {
 		panic(err.Error())
 	}
@@ -40,6 +40,31 @@ func mysqlGet(database string, row string, item string, limit int) []Text {
 		q = append(q, Text{r.ID, r.Subject, r.Creation})
 	}
 	//db.Close();
+	return q
+}
+
+func mysqlGetNewHighestID(database string, row string) int {
+	
+	//q := make([]Text, 0, 2)
+	var q int
+	c := L.Join(mysqlUser, ":", mysqlPass, "@/", database)
+	db, err := sql.Open("mysql", c)
+	if err != nil {
+        panic(err.Error())
+	}
+	defer db.Close()	
+	results, err := db.Query( L.Join("SELECT id FROM ", row, " ORDER BY id DESC LIMIT 0, 1;"))
+	if err != nil {
+		panic(err.Error())
+	}
+	for results.Next() {
+		var r Text
+		err = results.Scan(&r.ID)
+		if err != nil {
+			panic(err.Error())
+		}
+		q = r.ID + 1
+	}
 	return q
 }
 
