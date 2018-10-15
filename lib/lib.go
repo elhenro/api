@@ -1,4 +1,4 @@
-package time
+package lib
 
 import (
 	"os"
@@ -8,12 +8,24 @@ import (
 	"unicode"
 	"strconv"
 )
-func main() {
-}
 
 const (
 	debug = false
 )
+
+type LibError struct {
+	When time.Time
+	What string
+}
+func (e LibError) Error() string {
+	return fmt.Sprintf("%v: %v", e.When, e.What)
+}
+func oops() error {
+	return LibError{
+		time.Now(),
+		"error in lib.go",
+	}
+}
 func GetTimeframeHours(t1 string, t2 string) float64{
 	// 10:30, 17:30
 	// returns timeframe in hours  e.g.: 2.8
@@ -24,10 +36,10 @@ func GetTimeframeHours(t1 string, t2 string) float64{
 	mm1, err := strconv.Atoi(hhmm1[1])
 	hh2, err := strconv.Atoi(hhmm2[0])
 	mm2, err := strconv.Atoi(hhmm2[1])
-	
-	if err != nil {
-        fmt.Println(err)
-    }
+		
+	if err /*:= oops(); err*/ != nil {
+		fmt.Println(err)
+	}
 
 	t := time.Now()
 	berlinTime, err := time.LoadLocation("Europe/Berlin")
@@ -115,4 +127,10 @@ func GetLastLineOfFile(fname string) string {
 	l := strings.Split(lines, "\n")
 	ll := l[len(l)-2]
 	return ll
+}
+
+func main() {
+	if err := oops(); err != nil {
+		fmt.Println(err)
+	}
 }

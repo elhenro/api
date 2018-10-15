@@ -20,8 +20,24 @@ testing on cli
 
 `curl -d -X POST http://localhost:8000/write/test`
 
-## mysql
+## use mysql through api
 
 `curl -i http://localhost:8000/text` get all mysql text slices
 
 `curl -d -X POST http://localhost:8000/text/schlubbel` add schlubbel as new text item to mysql
+
+# commandline application
+
+for bash autocompletition
+
+bash
+
+`cd gh && go install && echo "PROG=gh source $GOPATH/src/github.com/urfave/cli/autocomplete/bash_autocomplete" >> ~/.bashrc && source ~/.bashrc`
+
+zsh
+
+`cd gh && go install && echo "PROG=gh source $GOPATH/src/github.com/urfave/cli/autocomplete/zsh_autocomplete" >> ~/.zshrc && source ~/.zshrc`
+
+## usage
+
+`gh get http://localhost:8000/time`

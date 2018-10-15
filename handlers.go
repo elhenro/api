@@ -28,7 +28,7 @@ func writeTextToDB(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("hai")
 	// TODO: get id automatically
-	mysqlWriteText("api", "texts", 2, string(content))
+	mysqlWriteText("api", "texts", 3, string(content))
 
 	result := mysqlGet("api", "texts", "*", 10)
 	json.NewEncoder(w).Encode(result)

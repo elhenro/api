@@ -18,8 +18,17 @@
         @vue-circle-end="progress_end">
           <p>Slot!</p>
       </vue-circle>
-      <input v-model="message" placeholder="...">
-      <button v-on:click="send()">go</button>
+      <input v-model="time" placeholder=".. time ...">
+      <button v-on:click="sendTime()">go</button>
+
+  <input v-model="message" placeholder="..msg ...">
+      <button v-on:click="sendMessage()">go</button>
+
+      {{message}}
+      <p v-for="msg in messages">
+        {{msg.text}}
+        </p>
+        {{messages}}
   </div>
 </template>
 
@@ -35,6 +44,8 @@
   Vue.use(VueAxios, axios)
 
 const url = "http://localhost:8000/time/percent";
+const urlReadTextApi = "http://localhost:8000/text";
+const urlWriteTextApi = "http://localhost:8000/text/"/*parameter*/;
 
 export default {
   name: 'app',
@@ -43,11 +54,13 @@ export default {
   },
   data () {
     return {
-      results: 3 || Number(this.results),//Number(this.getProgress),
-      //results: this.getProgress,
-      msg: 'Welcome to Your Vue.js App',
+      results: 3/* || Number(this.results),//Number(this.getProgress),*/,
+      time: "",
       message: "",
-      //fill : { gradient: ["red", "green", "blue"] },
+      messages: [/*
+        { text: "tt"},
+        { text: "tddt"}
+        */],
       fill: { gradient: ["black", "red"]},
     }
   },
@@ -67,7 +80,7 @@ export default {
     },
     setTime(string){
       //timeValueString = "10:30/18:01"
-      var reqUrl = 'http://localhost:8000/time/set/' + this.getMsg();
+      var reqUrl = 'http://localhost:8000/time/set/' + this.getTime();
       axios.post(reqUrl, 
       this.name,
       { headers: {
@@ -79,8 +92,33 @@ export default {
     send(){
       this.setTime();
     },
-    getMsg(){
+    getTime(){
+      return this.time;
+    },
+    sendMessage(){
+      this.addMessage(this.getMessage)
+    },
+    getMessage(){
       return this.message;
+    },
+    requestMessages(){
+      axios.get(urlReadTextApi).then(response => {
+        this.messages.push(response.data)
+      })
+    },
+    addMessage(string){
+      axios.post(urlWriteTextApi + this.getMessage(), 
+      this.name,
+      { headers: {
+        'Content-type': 'application/x-www-form-urlencoded',
+      }
+      })/*.then(response => ); */
+      this.requestMessages()
+    },
+    refreshMessages(){
+      axios.get(url).then(response => {
+        this.messages.push(response.data)
+      })
     },
     refreshTime(){
       axios.get(url).then(response => {
@@ -103,11 +141,8 @@ export default {
     }
   },
   mounted() {
-    /*
-    axios.get(url).then(response => {
-      this.results = Number(response.data)
-    })*/
     this.refreshTime()
+    this.requestMessages()
   },
   render: h => h(App)
 }
