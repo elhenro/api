@@ -112,3 +112,25 @@ func getHelp(w http.ResponseWriter, r *http.Request) {
 	result := string(content)
 	json.NewEncoder(w).Encode(result)
 }
+
+func checkUserWithPass(w http.ResponseWriter, r *http.Request){
+	params := mux.Vars(r)
+	//var timeR string
+	//_ = json.NewDecoder(r.Body).Decode(&timeRequest)
+	name := params["name"]	
+	pass := params["pass"]
+
+	res := mysqlcheckUserWithPass(name, pass)
+	json.NewEncoder(w).Encode(res)
+}	
+
+func addUser(w http.ResponseWriter, r *http.Request){
+	params := mux.Vars(r)
+	//var timeR string
+	//_ = json.NewDecoder(r.Body).Decode(&timeRequest)
+	name := params["name"]	
+	pass := params["pass"]
+
+	res := mysqlAddUser(name, pass)
+	json.NewEncoder(w).Encode(res)
+}
