@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 	"bytes"
     "encoding/json"
 	"log"
@@ -13,7 +14,7 @@ import (
 
 func getTextFromDB(w http.ResponseWriter, r *http.Request) {
 
-	resultFromDb := mysqlGet("api", "texts", "*"/*, 10*/)
+	resultFromDb := mysqlGet("api", "texts", "*", 0)
 	content:= resultFromDb
 
 	result := content
@@ -33,7 +34,7 @@ func writeTextToDB(w http.ResponseWriter, r *http.Request) {
 
 	mysqlWriteText("api", "texts", mysqlGetNewHighestID("api", "texts"), string(content))
 
-	result := mysqlGet("api", "texts", "*"/*, 10*/)
+	result := mysqlGet("api", "texts", "*", 0)
 	json.NewEncoder(w).Encode(result)
 }
 
@@ -60,8 +61,6 @@ func Write(w http.ResponseWriter, r *http.Request) {
 	if _, err = f.WriteString(content); err != nil {
 		panic(err)
 	}
-
-
     json.NewEncoder(w).Encode(content)
 }
 
@@ -133,4 +132,33 @@ func addUser(w http.ResponseWriter, r *http.Request){
 
 	res := mysqlAddUser(name, pass)
 	json.NewEncoder(w).Encode(res)
+}
+
+func ChatRead(w http.ResponseWriter, r *http.Request) {
+	var res string
+	for _, p := range mysqlGetChatItems("api", "chat", 100) {
+			res = L.Join(res, strconv.Itoa(p.id), p.message, p.author, p.creation)
+		}
+	json.NewEncoder(w).Encode(res)
+}
+
+func ChatWrite(w http.ResponseWriter, r *http.Request) {
+	var res string
+	params := mux.Vars(r)
+    var contentIn string
+	_ = json.NewDecoder(r.Body).Decode(&contentIn)
+	content := params["c"]	
+	author := params["a"]
+	pass := params["p"]
+
+	if mysqlcheckUserWithPass(author, pass){
+		newID := mysqlGetNewHighestID("api", "chat")
+		mysqlWriteChatText("api", "chat", newID, content, author)
+
+		for _, p := range mysqlGetChatItemByID("api", "chat", strconv.Itoa(newID), 0) {
+			res = L.Join(res, strconv.Itoa(p.id), p.message, p.author, p.creation)
+		}
+	}
+	
+    json.NewEncoder(w).Encode(res)
 }

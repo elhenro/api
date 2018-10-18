@@ -15,6 +15,13 @@ type Text struct {
 	Creation string `json:"name`
 }
 
+type ChatItem struct {
+	id int `json:"id"`
+	message string `json:"message"`
+	author string `json:"author"`
+	creation string `json:"creation"`
+}
+
 type User struct {
 	id int `json:"id"`
 	name string `json:id`
@@ -26,7 +33,7 @@ const (
 	mysqlPass = "test"
 )
 
-func mysqlGet(database string, row string, item string/*, limit int*/) []Text {
+func mysqlGet(database string, row string, item string, limit int) []Text {
 	q := make([]Text, 0, 2)
 
 	c := L.Join(mysqlUser, ":", mysqlPass, "@/", database)
@@ -172,4 +179,73 @@ func HashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+func mysqlWriteChatText(database string, row string, id int, content string, author string) {
+	c := L.Join(mysqlUser, ":", mysqlPass, "@/", database)
+	db, err := sql.Open("mysql", c)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	stmtIns, err := db.Prepare(L.Join("INSERT INTO ", row, " ( id, message, author, creation ) VALUES( ?, ?, ?, NOW() )"))
+	if err != nil {
+		panic(err.Error())
+	}
+	defer stmtIns.Close() 
+
+	_, err = stmtIns.Exec( id, content, author)
+	if err != nil {
+		panic(err.Error())
+	}
+
+}
+
+func mysqlGetChatItems(database string, row string, limit int) []ChatItem {
+	q := make([]ChatItem, 0, 2)
+
+	c := L.Join(mysqlUser, ":", mysqlPass, "@/", database)
+	db, err := sql.Open("mysql", c)
+	if err != nil {
+        panic(err.Error())
+	}
+	defer db.Close()	
+	results, err := db.Query(L.Join("SELECT id, message, author, creation FROM ", row, ";"))
+	if err != nil {
+		panic(err.Error())
+	}
+	for results.Next() {
+		var r ChatItem
+		err = results.Scan(&r.id, &r.message, &r.author, &r.creation)
+		if err != nil {
+			panic(err.Error())
+		}
+		q = append(q, ChatItem{r.id, r.message, r.author, r.creation})
+	}
+	return q
+}
+
+func mysqlGetChatItemByID(database string, row string, itemID string, limit int) []ChatItem {
+	q := make([]ChatItem, 0, 2)
+
+	c := L.Join(mysqlUser, ":", mysqlPass, "@/", database)
+	db, err := sql.Open("mysql", c)
+	if err != nil {
+        panic(err.Error())
+	}
+	defer db.Close()	
+	results, err := db.Query(L.Join("SELECT id, message, author, creation FROM ", row, " where id= ", itemID,";"))
+	if err != nil {
+		panic(err.Error())
+	}
+	for results.Next() {
+		var r ChatItem
+		err = results.Scan(&r.id, &r.message, &r.author, &r.creation)
+		if err != nil {
+			panic(err.Error())
+		}
+		q = append(q, ChatItem{r.id, r.message, r.author, r.creation})
+	}
+	return q
 }

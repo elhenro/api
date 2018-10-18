@@ -1,7 +1,7 @@
 <template>
   <div id="app">
 
-    <input v-model="time" placeholder=".. time ...">
+    <input v-model="time" placeholder=".. time ..." v-on:keyup.enter="sendTime()">
     <button v-on:click="sendTime()">go</button>
     <p>{{results}}</p>
 
@@ -19,7 +19,7 @@
       insert-mode="append"
       :thickness="5"
       :show-percent="true"
-      @vue-circle-progress="progress"
+      @vue-circle-progress="progressP"
       @vue-circle-end="progress_end">
         <p>Slot!</p>
       </vue-circle>
@@ -56,7 +56,7 @@ export default {
   },
   data () {
     return {
-      results: 3/* || Number(this.results),//Number(this.getProgress),*/,
+      results: 0,
       time: "",
       message: "",
       messages: Array,/*[]
@@ -70,7 +70,7 @@ export default {
     debug(boolean){
       return false;
     },
-    progress(event,progress,stepValue){
+    progressP(event,progress,stepValue){
       if (this.debug()){
         console.log(stepValue);
       }
@@ -91,7 +91,7 @@ export default {
       })/*.then(response => ); */
       this.refreshTime(this.getProgress())
     },
-    send(){
+    sendTime(){
       this.setTime();
     },
     getTime(){

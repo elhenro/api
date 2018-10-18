@@ -37,6 +37,8 @@ func main() {
 	router.HandleFunc("/adduser/{name}/{pass}", addUser).Methods("POST")
 	router.HandleFunc("/checkUserWithPass/{name}/{pass}", checkUserWithPass).Methods("POST")
 
+	router.HandleFunc("/chat/read", ChatRead).Methods("GET")
+	router.HandleFunc("/chat/write/{a}/{p}/{c}", ChatWrite).Methods("POST")
 
 	router.HandleFunc("/getnewid", getNewIDfromTextDB).Methods("GET")
     log.Fatal(http.ListenAndServe(L.Join(":",strconv.Itoa(port)), handler/*handlers.CORS(corsOk, headersOk, methodsOk)(router)*/))
